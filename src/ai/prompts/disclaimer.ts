@@ -1,0 +1,1 @@
+export const DISCLAIMER = `MediClarify provides informational guidance only and is not a medical diagnosis or a substitute for professional care. If symptoms are severe or worsening, seek in-person medical attention immediately. In India, call 112 for emergencies.`;
