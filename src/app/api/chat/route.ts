@@ -16,6 +16,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(riskResult);
   } catch (err) {
     console.error('API error:', err);
-    return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
+    return NextResponse.json({ error: err }, { status: 500 });
   }
 }

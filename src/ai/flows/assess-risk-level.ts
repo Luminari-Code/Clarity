@@ -11,6 +11,7 @@ import { CONFLICTS_CONSISTENCY } from '@/ai/prompts/conflicts-consistency';
 import { UX_WRAPPER } from '@/ai/prompts/ux-wrapper';
 import { DISCLAIMER } from '@/ai/prompts/disclaimer';
 
+// ----- Schemas -----
 const CaseIntakeSchema = z.object({
   demographics: z.object({
     age: z.number().optional(),
@@ -52,6 +53,50 @@ const StableAssessmentSchema = z.object({
   disclaimer: z.string().default(''),
 });
 
+// Helper function to generate text without schema validation
+async function generateTextSafely(prompt: string, fallback: string): Promise<string> {
+  try {
+    // Use generate without schema validation for text outputs
+    const result = await ai.generate({
+      prompt,
+      // Don't specify output schema - let it return raw text
+    }) as any; // Type assertion to avoid TypeScript issues
+    
+    // Extract text from the result - check various possible properties
+    if (result?.text && typeof result.text === 'string' && result.text.trim()) {
+      return result.text.trim();
+    }
+    
+    // Try other common response properties
+    if (result?.output && typeof result.output === 'string' && result.output.trim()) {
+      return result.output.trim();
+    }
+    
+    // If result itself is a string
+    if (typeof result === 'string' && result.trim()) {
+      return result.trim();
+    }
+    
+    // Try to stringify if it's an object with content
+    if (result && typeof result === 'object') {
+      const stringified = JSON.stringify(result);
+      if (stringified && stringified !== '{}' && stringified !== 'null') {
+        // Try to extract readable content from the stringified result
+        const match = stringified.match(/"(?:text|content|message|output)":"([^"]+)"/i);
+        if (match && match[1]) {
+          return match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+        }
+      }
+    }
+    
+    return fallback;
+  } catch (error) {
+    console.error('Text generation failed:', error);
+    return fallback;
+  }
+}
+
+// ----- Flow -----
 export const assessRiskLevelFlow = ai.defineFlow(
   {
     name: 'assessRiskLevelFlow',
@@ -63,6 +108,7 @@ export const assessRiskLevelFlow = ai.defineFlow(
     }),
   },
   async (caseIntake) => {
+    // 1. Red flag check
     const redPrompt = ai.definePrompt({
       name: 'redFlagCheck',
       input: { schema: CaseIntakeSchema },
@@ -73,23 +119,17 @@ export const assessRiskLevelFlow = ai.defineFlow(
     const redCheck = await redPrompt(caseIntake);
 
     if (redCheck.output?.urgent) {
-      const urgentPrompt = ai.definePrompt({
-        name: 'urgentUxWrapper',
-        input: { schema: z.object({ reasons: z.string() }) },
-        output: { schema: z.string().default('') },
-        prompt: `Create a calm, user-facing message for an urgent medical situation. The reasons are: {{reasons}}. Include the disclaimer: ${DISCLAIMER}`,
-      });
-
-      // Parse output here to convert null to ''
-      const urgentUI = z.string().default('').parse(
-        (await urgentPrompt({
-          reasons: redCheck.output?.reasons?.join(', ') || '',
-        })).output
+      // Generate urgent UI message without schema validation
+      const urgentPrompt = `Create a calm, user-facing message for an urgent medical situation. The reasons are: ${redCheck.output?.reasons?.join(', ') || ''}. Include the disclaimer: ${DISCLAIMER}`;
+      const urgentUI = await generateTextSafely(
+        urgentPrompt,
+        `This appears to be an urgent medical situation. Please seek immediate medical attention. ${DISCLAIMER}`
       );
 
       return { urgent: true, ui: urgentUI, stable: null };
     }
 
+    // 2. Stable assessment
     const stablePrompt = ai.definePrompt({
       name: 'stableAssessment',
       input: { schema: CaseIntakeSchema },
@@ -101,6 +141,7 @@ export const assessRiskLevelFlow = ai.defineFlow(
       (await stablePrompt(caseIntake)).output ?? {},
     );
 
+    // 3. Guardrails
     const guardPrompt = ai.definePrompt({
       name: 'medsGuardrails',
       input: { schema: StableAssessmentSchema },
@@ -109,10 +150,9 @@ export const assessRiskLevelFlow = ai.defineFlow(
     });
 
     const guardrailResult = (await guardPrompt(stable)).output;
-    if (guardrailResult?.now) {
-      stable.action_plan.now = guardrailResult.now;
-    }
+    if (guardrailResult?.now) stable.action_plan.now = guardrailResult.now;
 
+    // 4. Localize if India
     if (caseIntake.region === 'IN') {
       const locPrompt = ai.definePrompt({
         name: 'localizerIndia',
@@ -127,6 +167,7 @@ export const assessRiskLevelFlow = ai.defineFlow(
       }
     }
 
+    // 5. Consistency check
     const conPrompt = ai.definePrompt({
       name: 'consistencyCheck',
       input: { schema: z.object({ stable_assessment: StableAssessmentSchema, case_intake: CaseIntakeSchema }) },
@@ -138,16 +179,11 @@ export const assessRiskLevelFlow = ai.defineFlow(
       (await conPrompt({ stable_assessment: stable, case_intake: caseIntake })).output ?? stable,
     );
 
-    const uxPrompt = ai.definePrompt({
-      name: 'uxWrapper',
-      input: { schema: StableAssessmentSchema },
-      output: { schema: z.string().default('') },
-      prompt: `${GLOBAL_POLICY}\n${UX_WRAPPER}`,
-    });
-
-    // Parse output here to convert null to ''
-    const ui = z.string().default('').parse(
-      (await uxPrompt(stable)).output
+    // 6. UX wrapper - Generate text without schema validation
+    const uxPromptText = `${GLOBAL_POLICY}\n${UX_WRAPPER}\n\nStable Assessment: ${JSON.stringify(stable)}`;
+    const ui = await generateTextSafely(
+      uxPromptText,
+      'Risk assessment completed. Please review the detailed analysis below.'
     );
 
     return { urgent: false, ui, stable };
@@ -155,5 +191,15 @@ export const assessRiskLevelFlow = ai.defineFlow(
 );
 
 export async function assessRiskLevel(input: any) {
-  return assessRiskLevelFlow(input);
+  try {
+    return await assessRiskLevelFlow(input);
+  } catch (error) {
+    console.error('Error in assessRiskLevel:', error);
+    // Return a safe fallback response
+    return {
+      urgent: false,
+      ui: 'Unable to complete risk assessment. Please consult a healthcare provider.',
+      stable: null
+    };
+  }
 }
