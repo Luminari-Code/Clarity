@@ -1,3 +1,4 @@
 .env
 test-issues.txt
 node_modules
+.next
