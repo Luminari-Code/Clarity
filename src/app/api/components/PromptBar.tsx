@@ -30,6 +30,7 @@ export default function PromptBar({
   onResult?: (data: ResultPayload) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [value, setValue] = useState<string>('');     // controlled value
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -38,21 +39,19 @@ export default function PromptBar({
   };
 
   const submit = async () => {
-    const value = (inputRef.current?.value ?? '').trim();
-    if (!value || loading) return;
-
-    // Clear input immediately for better UX
-    if (inputRef.current) inputRef.current.value = '';
+    const text = value.trim();
+    if (!text || loading) return;
 
     setLoading(true);
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: value, region }),
+        body: JSON.stringify({ messages: text, region }),
       });
       const data = (await res.json()) as ResultPayload;
       emit(data);
+      // Do NOT clear input — it stays for the user to edit/change later
     } catch {
       emit({ ui: 'Unable to reach MediClarify. Please try again.' });
     } finally {
@@ -61,14 +60,12 @@ export default function PromptBar({
   };
 
   const setSuggestion = (text: string) => {
-    if (!inputRef.current) return;
-    inputRef.current.value = text;
-    inputRef.current.focus();
+    setValue(text);
+    inputRef.current?.focus();
   };
 
   return (
     <div className="w-full">
-      {/* Main input area */}
       <div
         className={`rounded-[28px] border bg-white px-5 py-4 shadow-sm transition-all sm:px-6 ${
           focused ? 'border-slate-400' : 'border-slate-300'
@@ -77,9 +74,12 @@ export default function PromptBar({
         <label htmlFor="symptoms" className="block text-sm font-medium text-slate-700">
           Describe your symptoms
         </label>
+
         <input
           id="symptoms"
           ref={inputRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
           className="mt-1 w-full bg-transparent text-[15px] placeholder:text-slate-400 focus:outline-none"
           onFocus={() => setFocused(true)}
@@ -109,12 +109,11 @@ export default function PromptBar({
             className="inline-flex h-10 items-center justify-center rounded-full bg-slate-900 px-5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             aria-label="Get MediClarify guidance"
           >
-            {loading ? 'Thinking…' : 'Get guidance'}
+            {loading ? 'Thinking…' : 'Assess'}
           </button>
         </div>
       </div>
 
-      {/* Privacy reassurance */}
       <p className="mt-2 text-xs text-slate-500">Your information is private and secure.</p>
     </div>
   );

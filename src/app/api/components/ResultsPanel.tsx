@@ -112,7 +112,7 @@ export default function ResultsPanel({ data }: { data: ResultPayload | null }) {
       {/* Data gaps */}
       {stable.data_gaps?.length ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-slate-900">Helpful clarifications</h3>
+          <h3 className="text-base font-semibold text-slate-900">Helpful clarifications for me</h3>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-slate-700">
             {stable.data_gaps.map((g, i) => (
               <li key={i}>{g}</li>
