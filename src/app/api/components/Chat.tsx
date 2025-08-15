@@ -76,7 +76,7 @@ export default function Chat() {
             <span className="text-xl">🩺</span>
           </div>
           <div>
-            <h1 className="font-semibold text-slate-800">MediClarify</h1>
+            <h1 className="font-semibold text-slate-800">Clarity</h1>
             <p className="text-sm text-slate-500">Your caring health guidance assistant</p>
           </div>
         </div>

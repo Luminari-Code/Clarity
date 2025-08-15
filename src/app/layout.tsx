@@ -10,14 +10,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'MediClarify - Caring Health Guidance',
+  title: 'Clarity - Caring Health Guidance',
   description:
     'Get gentle, clear guidance for your health concerns with AI-powered support that puts your wellbeing first.',
   keywords:
     'health guidance, medical advice, symptom checker, healthcare assistant, triage, self-care',
-  authors: [{ name: 'MediClarify Team' }],
-  creator: 'MediClarify',
-  publisher: 'MediClarify',
+  authors: [{ name: 'Clarity Team' }],
+  creator: 'Clarity',
+  publisher: 'Clarity',
   robots: 'index, follow',
   viewport: 'width=device-width, initial-scale=1',
   themeColor: '#2563eb',
@@ -26,14 +26,14 @@ export const metadata: Metadata = {
       "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>",
   },
   openGraph: {
-    title: 'MediClarify - Caring Health Guidance',
+    title: 'Clarity - Caring Health Guidance',
     description: 'Get gentle, clear guidance for your health concerns',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MediClarify - Caring Health Guidance',
+    title: 'Clarity - Caring Health Guidance',
     description: 'Get gentle, clear guidance for your health concerns',
   },
 };
@@ -67,7 +67,7 @@ export default function RootLayout({
             <div className="mx-auto max-w-4xl px-6 text-center">
               <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
                 <span className="text-lg">🩺</span>
-                <span className="font-medium">MediClarify</span>
+                <span className="font-medium">Clarity</span>
                 <span>•</span>
                 <span>
                   Calm, clear guidance. Not a substitute for professional medical
@@ -88,7 +88,7 @@ export default function RootLayout({
               </div>
 
               <div className="mt-3 text-xs text-slate-400">
-                © {new Date().getFullYear()} MediClarify. All rights reserved.
+                © {new Date().getFullYear()} Clarity. All rights reserved.
               </div>
             </div>
           </footer>

@@ -106,7 +106,7 @@ function ResultsPanel({ data }: { data: ResultPayload | null }) {
           // If only UI text exists
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
-              {urgent ? 'Urgent guidance' : 'MediClarify guidance'}
+              {urgent ? 'Urgent guidance' : 'Clarity guidance'}
             </h2>
             <div className="mt-3 text-slate-700 whitespace-pre-wrap">{ui || 'No guidance available.'}</div>
           </div>
@@ -120,7 +120,7 @@ function ResultsPanel({ data }: { data: ResultPayload | null }) {
 
 /* =========================
    Structured Results
-   - “MediClarify assessment” hidden on screen, included in PDF
+   - “Clarity assessment” hidden on screen, included in PDF
    ========================= */
 
 function StructuredResults({ ui, stable }: { ui?: string; stable: StableAssessment }) {
@@ -142,7 +142,7 @@ function StructuredResults({ ui, stable }: { ui?: string; stable: StableAssessme
       {/* Print-only summary (included in PDF, hidden on screen) */}
       <div className="hidden print:block rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-slate-900">MediClarify assessment</h2>
+          <h2 className="text-lg font-semibold text-slate-900">Clarity assessment</h2>
           {tierBadge(stable.overall_risk_tier)}
         </div>
         {stable.rationale ? <p className="mt-3 text-slate-700">{stable.rationale}</p> : null}

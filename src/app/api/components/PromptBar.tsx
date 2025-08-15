@@ -53,7 +53,7 @@ export default function PromptBar({
       emit(data);
       // Do NOT clear input — it stays for the user to edit/change later
     } catch {
-      emit({ ui: 'Unable to reach MediClarify. Please try again.' });
+      emit({ ui: 'Unable to reach Clarity. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ export default function PromptBar({
             onClick={submit}
             disabled={loading}
             className="inline-flex h-10 items-center justify-center rounded-full bg-slate-900 px-5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-            aria-label="Get MediClarify guidance"
+            aria-label="Get Clarity guidance"
           >
             {loading ? 'Thinking…' : 'Assess'}
           </button>

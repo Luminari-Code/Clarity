@@ -31,7 +31,7 @@ export default function ResultsPanel({ data }: { data: ResultPayload | null }) {
       <section aria-label="Results" className="mt-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">
-            {urgent ? 'Urgent guidance' : 'MediClarify guidance'}
+            {urgent ? 'Urgent guidance' : 'Clarity guidance'}
           </h2>
           <div className="mt-3 text-slate-700 whitespace-pre-wrap">{ui || 'No guidance available.'}</div>
         </div>
@@ -53,7 +53,7 @@ export default function ResultsPanel({ data }: { data: ResultPayload | null }) {
       {/* Summary header */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-slate-900">MediClarify assessment</h2>
+          <h2 className="text-lg font-semibold text-slate-900">Clarity assessment</h2>
           {tierBadge(stable.overall_risk_tier)}
         </div>
         {stable.rationale ? (
